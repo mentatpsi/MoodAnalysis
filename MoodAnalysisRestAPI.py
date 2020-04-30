@@ -113,7 +113,7 @@ def login():
 
     result = db.session.query(User).filter(User.user_name == user_name)
 
-    count = len([student for student in result])
+    count = result.count()
 
     authorized = False
     if count == 1:
