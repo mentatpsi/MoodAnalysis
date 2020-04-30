@@ -1,0 +1,1 @@
+create table tbl1(one varchar(10), two smallint);
