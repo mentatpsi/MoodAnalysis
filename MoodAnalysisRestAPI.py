@@ -20,6 +20,8 @@ import datetime
 from datetime import timedelta
 
 
+from scipy import stats
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test1.db'
 db = SQLAlchemy(app) # set up database
@@ -84,6 +86,15 @@ class UserSession(Base):
 # create tables
 Base.metadata.create_all(engine)
 
+
+class MoodResponse:
+    def __init__(self, username,streak,percentile=None):
+        self.username = username
+        self.streak = streak
+        self.percentile = percentile
+
+
+
 @app.route("/login", methods=['GET'])
 def login():
     content = request.form
@@ -126,8 +137,6 @@ def login():
             ses = result_session[-1]
             if ses.active:
                 if (ses.date + timedelta(minutes=5)) < datetime.datetime.now():
-
-                    return str(ses.date)
                     token = secrets.token_hex(20)
                     usersession = UserSession(user_name,token)
 
@@ -216,6 +225,63 @@ def add_rating():
 
 
 
+@app.route("/mood", methods=['GET'])
+def mood():
+    content = request.form
+
+    user_name = content["user_name"]
+    token = content["token"]
+
+    result = db.session.query(UserSession).filter(UserSession.user_name == user_name and UserSession.active == 1)
+
+    count = result.count()
+
+    if result[-1].token == token:
+        last_rating = db.session.query(Rating).filter(Rating.user_name == user_name).order_by(desc(Rating.date)).first()
+        perc = percentile(last_rating.streak)
+        
+        if perc >= 50:
+            md = MoodResponse(user_name,last_rating.streak,perc)
+            return jsonify(
+                    {"user_name":md.username,
+                    "streak":md.streak,
+                    "percentile":md.percentile
+                    }
+                )
+        else:
+            md = MoodResponse(user_name,last_rating.streak)
+            return jsonify(
+                    {"user_name":md.username,
+                    "streak":md.streak
+                    }
+                )
+
+
+def percentile(num):
+    result = get_most_recent_streaks()
+
+    if (len(result) > 1):
+        perc = stats.percentileofscore(result, num)
+
+        return perc
+    else:
+        return 0
+
+
+
+
+def get_most_recent_streaks():
+    streaks = []
+
+    result = db.session.query(User)
+
+
+    for user in result:
+        last_rating = db.session.query(Rating).filter(Rating.user_name == user.user_name).order_by(desc(Rating.date)).first()
+        streaks.append(int(last_rating.streak))
+    
+    return streaks
+
 
 
 
@@ -235,9 +301,6 @@ def create_user():
 
     output = hashValue.hexdigest()
 
-
-    #Session = sessionmaker(bind=engine)
-    #session = Session()
 
     result = db.session.query(User).filter(User.user_name == user_name)
 
