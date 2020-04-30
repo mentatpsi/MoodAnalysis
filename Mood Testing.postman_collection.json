@@ -112,7 +112,7 @@
 						},
 						{
 							"key": "token",
-							"value": "adff6eaa3f7b3a4bf9f85c01fc7c1a87cb50c9c0",
+							"value": "5a1bb1dc00c87e343f51ffd8eae578c3c76455d2",
 							"type": "text"
 						}
 					]
@@ -129,6 +129,58 @@
 					"port": "5000",
 					"path": [
 						"addrating"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Mood Endpoint",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "user_name",
+							"value": "test1",
+							"type": "text"
+						},
+						{
+							"key": "token",
+							"value": "5a1bb1dc00c87e343f51ffd8eae578c3c76455d2",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/mood",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"mood"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
 					]
 				}
 			},
