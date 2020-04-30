@@ -5,11 +5,9 @@ from sqlalchemy import Column, Date, Integer, String, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 
-from sqlalchemy.orm import sessionmaker
 
-from sqlalchemy.sql.elements import TextClause
 from flask_sqlalchemy import SQLAlchemy
-from flask import Flask, render_template, request, send_file, send_from_directory, jsonify
+from flask import Flask, render_template, request, jsonify
 
 from hashlib import sha256
 
