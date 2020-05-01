@@ -235,24 +235,33 @@ def mood():
     count = result.count()
 
     if result[-1].token == token:
-        last_rating = db.session.query(Rating).filter(Rating.user_name == user_name).order_by(desc(Rating.date)).first()
-        perc = percentile(last_rating.streak)
-        
-        if perc >= 50:
-            md = MoodResponse(user_name,last_rating.streak,perc)
-            return jsonify(
-                    {"user_name":md.username,
-                    "streak":md.streak,
-                    "percentile":md.percentile
-                    }
-                )
+
+        if (result[-1].date + timedelta(minutes=5)) < datetime.datetime.now():
+                result[-1].active = False
+                db.session.commit()
+                return "Credentials Not Active. Please reattain token."
         else:
-            md = MoodResponse(user_name,last_rating.streak)
-            return jsonify(
-                    {"user_name":md.username,
-                    "streak":md.streak
-                    }
-                )
+            last_rating = db.session.query(Rating).filter(Rating.user_name == user_name).order_by(desc(Rating.date)).first()
+            
+            perc = percentile(last_rating.streak)
+            
+            if perc >= 50:
+                md = MoodResponse(user_name,last_rating.streak,perc)
+                return jsonify(
+                        {"user_name":md.username,
+                        "streak":md.streak,
+                        "percentile":md.percentile
+                        }
+                    )
+            else:
+                md = MoodResponse(user_name,last_rating.streak)
+                return jsonify(
+                        {"user_name":md.username,
+                        "streak":md.streak
+                        }
+                    )
+    else:
+        return "Unauthorized"
 
 
 def percentile(num):
